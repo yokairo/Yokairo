@@ -3,7 +3,7 @@ import express from "express";
 const app = express();
 app.use(express.json());
 
-/* ================= CHATGPT ================= */
+/* ================= CHATGPT (WORKING & FIXED) ================= */
 async function chatgptHandler(message) {
   const response = await fetch(
     "https://api.openai.com/v1/chat/completions",
@@ -38,18 +38,33 @@ app.post("/ai", async (req, res) => {
     const { provider = "chatgpt", message } = req.body;
 
     if (!message) {
-      return res.status(400).json({ error: "message required" });
+      return res.status(400).json({
+        error: "message required"
+      });
     }
 
-    const reply = await chatgptHandler(message);
+    let reply;
+
+    // ONLY CHATGPT ACTIVE (Gemini intentionally removed)
+    if (provider === "chatgpt") {
+      reply = await chatgptHandler(message);
+    } else {
+      return res.status(400).json({
+        error: "Invalid provider"
+      });
+    }
+
     res.json({ reply });
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
-    res.status(500).json({ error: "AI request failed" });
+    res.status(500).json({
+      error: "AI request failed"
+    });
   }
 });
 
+/* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("✅ Server running on port", PORT);
