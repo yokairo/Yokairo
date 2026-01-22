@@ -1,7 +1,6 @@
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
-import dotenv from "dotenv";
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -15,7 +14,7 @@ app.get("/", (req, res) => {
 
 /* ---------- GEMINI ---------- */
 async function geminiReply(message) {
-  const res = await fetch(
+  const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
@@ -26,28 +25,25 @@ async function geminiReply(message) {
     }
   );
 
-  const data = await res.json();
+  const data = await response.json();
   return data?.candidates?.[0]?.content?.parts?.[0]?.text || "No Gemini reply";
 }
 
 /* ---------- CHATGPT ---------- */
 async function chatgptReply(message) {
-  const res = await fetch(
-    "https://api.openai.com/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: message }],
-      }),
-    }
-  );
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: message }],
+    }),
+  });
 
-  const data = await res.json();
+  const data = await response.json();
   return data?.choices?.[0]?.message?.content || "No ChatGPT reply";
 }
 
@@ -71,7 +67,6 @@ app.post("/ai", async (req, res) => {
     }
 
     res.json({ reply });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "AI failed" });
