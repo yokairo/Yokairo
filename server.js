@@ -1,87 +1,85 @@
-import express from "express";
 import fetch from "node-fetch";
-import cors from "cors";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
-
-// 🔹 Health check
-app.get("/", (req, res) => {
-  res.send("✅ Yokairo AI server running");
-});
-
-// 🔹 Unified AI endpoint
-app.post("/ai", async (req, res) => {
-  const { provider, message } = req.body;
-
-  if (!provider || !message) {
-    return res.status(400).json({
-      error: "provider and message required"
-    });
-  }
-
+/* =========================
+   CHATGPT
+========================= */
+export async function chatgptHandler(message) {
   try {
-    // ================= CHATGPT =================
-    if (provider === "chatgpt") {
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [{ role: "user", content: message }]
-          })
-        }
-      );
+    const response = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: message }]
+        })
+      }
+    );
 
-      const data = await response.json();
-      return res.json({
-        provider: "chatgpt",
-        reply: data.choices[0].message.content
-      });
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("ChatGPT API error:", data);
+      throw new Error("ChatGPT API failed");
     }
 
-    // ================= GEMINI =================
-    if (provider === "gemini") {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [{ text: message }]
-              }
-            ]
-          })
-        }
-      );
+    return data.choices[0].message.content;
 
-      const data = await response.json();
-      return res.json({
-        provider: "gemini",
-        reply: data.candidates[0].content.parts[0].text
-      });
-    }
-
-    return res.status(400).json({ error: "Invalid provider" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "AI request failed" });
+    console.error("ChatGPT handler crash:", err.message);
+    throw err;
   }
-});
+}
 
-// 🔹 Server start
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+/* =========================
+   GEMINI (FIXED)
+========================= */
+export async function geminiHandler(message) {
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: message }]
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Gemini API error:", data);
+      throw new Error("Gemini API failed");
+    }
+
+    // Safety check
+    if (
+      !data.candidates ||
+      !data.candidates[0] ||
+      !data.candidates[0].content ||
+      !data.candidates[0].content.parts
+    ) {
+      console.error("Gemini invalid response:", data);
+      throw new Error("Gemini empty response");
+    }
+
+    return data.candidates[0].content.parts[0].text;
+
+  } catch (err) {
+    console.error("Gemini handler crash:", err.message);
+    throw err;
+  }
+}
