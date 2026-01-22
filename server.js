@@ -1,9 +1,14 @@
 import express from "express";
+import fetch from "node-fetch";
 
 const app = express();
 app.use(express.json());
 
-/* ================= CHATGPT ================= */
+const PORT = process.env.PORT || 3000;
+
+/* =========================
+   CHATGPT HANDLER
+========================= */
 async function chatgptHandler(message) {
   const response = await fetch(
     "https://api.openai.com/v1/chat/completions",
@@ -14,44 +19,66 @@ async function chatgptHandler(message) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: message }]
       })
     }
   );
 
   const data = await response.json();
-  if (!response.ok) throw data;
+
+  if (!data.choices || !data.choices[0]) {
+    throw new Error("Empty ChatGPT response");
+  }
 
   return data.choices[0].message.content;
 }
 
-/* ================= GEMINI ================= */
+/* =========================
+   GEMINI HANDLER
+========================= */
 async function geminiHandler(message) {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         contents: [
-          { role: "user", parts: [{ text: message }] }
+          {
+            parts: [{ text: message }]
+          }
         ]
       })
     }
   );
 
   const data = await response.json();
-  if (!response.ok) throw data;
+
+  if (
+    !data.candidates ||
+    !data.candidates[0] ||
+    !data.candidates[0].content
+  ) {
+    throw new Error("Empty Gemini response");
+  }
 
   return data.candidates[0].content.parts[0].text;
 }
 
-/* ================= ROUTE ================= */
+/* =========================
+   MAIN AI ROUTE
+========================= */
 app.post("/ai", async (req, res) => {
-  const { provider, message } = req.body;
-
   try {
+    const { provider, message } = req.body;
+
+    if (!provider || !message) {
+      return res.status(400).json({ error: "provider and message required" });
+    }
+
     let reply;
 
     if (provider === "chatgpt") {
@@ -65,13 +92,18 @@ app.post("/ai", async (req, res) => {
     res.json({ reply });
 
   } catch (err) {
-    console.error("AI ERROR:", err);
+    console.error("AI ERROR:", err.message);
     res.status(500).json({ error: "AI request failed" });
   }
 });
 
-/* ================= START ================= */
-const PORT = process.env.PORT || 3000;
+/* =========================
+   HEALTH CHECK
+========================= */
+app.get("/", (req, res) => {
+  res.send("Yokairo AI Server is running");
+});
+
 app.listen(PORT, () => {
-  console.log("Yokairo AI server running on", PORT);
+  console.log(`Server running on port ${PORT}`);
 });
