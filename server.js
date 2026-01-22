@@ -11,19 +11,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ✅ HEALTH CHECK */
 app.get("/", (req, res) => {
   res.send("Yokairo AI server running");
 });
 
-/* ✅ COMMON AI ROUTE */
 app.post("/ai", async (req, res) => {
   try {
     const { provider, message } = req.body;
 
     if (!provider || !message) {
       return res.status(400).json({
-        error: "provider and message are required",
+        error: "provider and message required",
       });
     }
 
@@ -31,28 +29,23 @@ app.post("/ai", async (req, res) => {
 
     if (provider === "gemini") {
       reply = await geminiReply(message);
-    } 
-    else if (provider === "chatgpt") {
+    } else if (provider === "chatgpt") {
       reply = await chatgptReply(message);
-    } 
-    else {
+    } else {
       return res.status(400).json({
-        error: "Invalid provider. Use gemini or chatgpt",
+        error: "Invalid provider",
       });
     }
 
-    res.json({
-      provider,
-      reply,
-    });
+    res.json({ provider, reply });
 
   } catch (err) {
-    console.error("AI Error:", err);
+    console.error(err);
     res.status(500).json({ error: "AI failed" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("Server running on", PORT);
 });
