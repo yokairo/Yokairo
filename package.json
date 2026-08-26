@@ -1,0 +1,7 @@
+{
+  "name": "yokai-cinematic-ui",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "start": "vite --host 0.0.0.0", "build": "vite", "check": "vite --host 127.0.0.1" },
+  "devDependencies": { "vite": "^6.1.0" }
+}
