@@ -1,0 +1,9 @@
+{
+  "name": "YOKAI — Enter the Void",
+  "short_name": "YOKAI",
+  "description": "A cinematic anime archive for worlds, souls, and shared stories.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080811",
+  "theme_color": "#070713"
+}

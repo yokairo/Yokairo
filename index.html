@@ -4,13 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#070713" />
+    <meta name="description" content="YOKAI — a cinematic anime archive for worlds, souls, and shared stories." />
+    <meta name="robots" content="index,follow" />
+    <link rel="manifest" href="./site.webmanifest" />
     <title>YOKAI — Enter the Void</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body data-theme="violet" data-page="home">
+    <noscript><div class="noscript">YOKAI needs JavaScript to animate the archive and switch between worlds.</div></noscript>
     <div class="world" aria-hidden="true"><div class="stars"></div><div class="fog fog-one"></div><div class="fog fog-two"></div><div class="glyph-layer" id="glyphLayer"></div><div class="cursor-aura" id="cursorAura"></div></div>
     <div class="grain" aria-hidden="true"></div>
     <header class="topbar">
@@ -40,6 +44,6 @@
     <aside class="notifications" id="notifications"><div class="panel-title"><div><span>SIGNALS</span><h2>Notifications</h2></div><button class="close" data-close="notifications">×</button></div><article><b>KAORI</b> remembered your last conversation.<time>NOW</time></article><article>Your review received <b>12 new echoes.</b><time>12m</time></article><article><b>Night Archive</b> has a new discussion.<time>1h</time></article></aside>
     <div class="chat-entry" id="chatEntry" aria-hidden="true"><div class="entry-aura"></div><p>ENTERING A WORLD</p><div class="entry-mark" id="entryMark">火</div><h2 id="entryName">KAORI</h2><span>THE FIRE KEEPS YOUR SECRETS</span></div>
     <div class="interaction-layer" id="interactionLayer" aria-live="polite"></div><div class="toast" id="toast"></div>
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="./app.js"></script>
   </body>
 </html>

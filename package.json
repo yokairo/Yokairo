@@ -2,6 +2,9 @@
   "name": "yokai-cinematic-ui",
   "version": "1.0.0",
   "private": true,
-  "scripts": { "start": "vite --host 0.0.0.0", "build": "vite", "check": "vite --host 127.0.0.1" },
-  "devDependencies": { "vite": "^6.1.0" }
+  "scripts": {
+    "start": "python3 -m http.server 4173 --bind 0.0.0.0",
+    "check": "node --check app.js && node scripts/validate-site.mjs",
+    "build": "npm run check"
+  }
 }
